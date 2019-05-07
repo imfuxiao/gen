@@ -24,7 +24,7 @@ func Find(fileName string) (string, error) {
 }
 
 func ExecuteModelTemplate(output string, obj *model.Model, templateName string) error {
-	filename := filepath.Join(output, strings.Join([]string{"gen", camel2sep(obj.ModelName, "."), "go"}, "."))
+	filename := filepath.Join(output, strings.Join([]string{camel2sep(obj.ModelName, "_"), "go"}, "."))
 
 	path := path.Dir(filename)
 	os.MkdirAll(path, 0755)
