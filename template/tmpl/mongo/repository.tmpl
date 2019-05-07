@@ -1,0 +1,156 @@
+{{- $bson:=`bson.D{{"id", id}}` -}}
+package repository
+
+import (
+    "{{.ProjectName}}/commons/utils"
+    "{{.ProjectName}}/model"
+    "context"
+    "go.mongodb.org/mongo-driver/bson"
+    "go.mongodb.org/mongo-driver/mongo"
+)
+
+const {{.ModelName}}Collection = "{{.DbTable}}"
+
+type {{.ModelName}}Repository struct {
+    database *mongo.Database
+}
+
+func New{{.ModelName}}Repository(database *mongo.Database) *{{.ModelName}}Repository {
+	return &{{.ModelName}}Repository{database}
+}
+
+func (repository *{{.ModelName}}Repository) InsertOne(ctx context.Context, {{.ModelName|ScoreToSmallCamel}} *model.{{.ModelName}}) (string, error) {
+	result, err := repository.database.Collection({{.ModelName}}Collection).InsertOne(ctx, {{.ModelName|ScoreToSmallCamel}})
+	if err != nil {
+		return "", err
+	}
+	return utils.InsertedIDToString(result)
+}
+
+func (repository *{{.ModelName}}Repository) InsertMany(ctx context.Context, {{.ModelName|ScoreToSmallCamel}}s []model.{{.ModelName}}) ([]string, error) {
+	data, err := utils.ParseInterface({{.ModelName|ScoreToSmallCamel}}s)
+	if err != nil {
+		return nil, err
+	}
+	result, err := repository.database.Collection({{.ModelName}}Collection).InsertMany(ctx, data)
+	if err != nil {
+		return nil, err
+	}
+	return utils.InsertedIDsToString(result)
+}
+
+func (repository *{{.ModelName}}Repository) FindOne(ctx context.Context, filter *model.{{.ModelName}}) (*model.{{.ModelName}}, error) {
+	var {{.ModelName|ScoreToSmallCamel}} model.{{.ModelName}}
+	err := repository.database.Collection({{.ModelName}}Collection).FindOne(ctx, filter).Decode(&{{.ModelName|ScoreToSmallCamel}})
+	if err != nil {
+		return nil, err
+	}
+	return &{{.ModelName|ScoreToSmallCamel}}, nil
+}
+
+func (repository *{{.ModelName}}Repository) FindMany(ctx context.Context, filter *model.{{.ModelName}}) ([]model.{{.ModelName}}, error) {
+	cursor, err := repository.database.Collection({{.ModelName}}Collection).Find(ctx, filter)
+	defer func() {
+		if cursor != nil {
+			_ = cursor.Close(ctx)
+		}
+	}()
+
+	if err != nil {
+		return nil, err
+	}
+
+	{{.ModelName|ScoreToSmallCamel}}s := make([]model.{{.ModelName}}, 0, 10)
+	for cursor.Next(ctx) {
+		var {{.ModelName|ScoreToSmallCamel}} model.{{.ModelName}}
+		err = cursor.Decode(&{{.ModelName|ScoreToSmallCamel}})
+		if err != nil {
+			return nil, err
+		}
+		{{.ModelName|ScoreToSmallCamel}}s = append({{.ModelName|ScoreToSmallCamel}}s, {{.ModelName|ScoreToSmallCamel}})
+	}
+	return {{.ModelName|ScoreToSmallCamel}}s, nil
+}
+
+func (repository *{{.ModelName}}Repository) FindByPage(ctx context.Context, page model.Page, filter *model.{{.ModelName}}) (*model.Response{{.ModelName}}Data, error) {
+
+	// 查询总数量
+	total, err := repository.Count(ctx, page, filter)
+	if err != nil {
+		return nil, err
+	}
+	page.SetTotal(&total)
+
+	bsonFilter, err := PageFilter(page, filter)
+	if err != nil {
+		return nil, err
+	}
+
+    // 查询数据
+	cursor, err := repository.database.Collection({{.ModelName}}Collection).Find(ctx, bsonFilter, PageOption(page))
+	defer func() {
+		_ = cursor.Close(ctx)
+	}()
+	if err != nil {
+		return nil, err
+	}
+
+	{{.ModelName|ScoreToSmallCamel}}s := make([]model.{{.ModelName}}, 0, page.PageSize)
+
+	for cursor.Next(ctx) {
+		var {{.ModelName|ScoreToSmallCamel}} model.{{.ModelName}}
+		err := cursor.Decode(&{{.ModelName|ScoreToSmallCamel}})
+		if err != nil {
+			return nil, err
+		}
+		{{.ModelName|ScoreToSmallCamel}}s = append({{.ModelName|ScoreToSmallCamel}}s, {{.ModelName|ScoreToSmallCamel}})
+	}
+
+	if len({{.ModelName|ScoreToSmallCamel}}s) != 0 {
+		page.Id = {{.ModelName|ScoreToSmallCamel}}s[len({{.ModelName|ScoreToSmallCamel}}s)-1].Id.Hex()
+	} else {
+		page.Id = ""
+	}
+	return &model.Response{{.ModelName}}Data{
+		Page:         page,
+		{{.ModelName|ScoreToBigCamel}}s: {{.ModelName|ScoreToSmallCamel}}s,
+	}, nil
+}
+
+func (repository *{{.ModelName}}Repository) Count(ctx context.Context, page model.Page, filter *model.{{.ModelName}}) (int64, error) {
+	// page.id 是用来做mongo分页的, mongo的skip()分页性能弱, 所以这里使用id作为排序, 通过id做分页, 比skip()性能要好很多
+	// 查询总数据量时, 不需要ID参数, 所以这里将id设置为空字符串
+	page.Id = ""
+	countFilter, err := PageFilter(page, filter)
+	if err != nil {
+		return 0, err
+	}
+	return repository.database.Collection({{.ModelName}}Collection).CountDocuments(ctx, countFilter)
+}
+
+func (repository *{{.ModelName}}Repository) UpdateOne(ctx context.Context, filter *model.{{.ModelName}}, {{.ModelName|ScoreToSmallCamel}} *model.{{.ModelName}})  error {
+	_, err := repository.database.Collection({{.ModelName}}Collection).UpdateOne(ctx, filter, bson.D{
+		{"$set", {{.ModelName|ScoreToSmallCamel}}},
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (repository *{{.ModelName}}Repository) DeleteOne(ctx context.Context, filter *model.{{.ModelName}}) error {
+	_, err := repository.database.Collection({{.ModelName}}Collection).DeleteOne(ctx, filter)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (repository *{{.ModelName}}Repository) DeleteMany(ctx context.Context, filter *model.{{.ModelName}}) error {
+	_, err := repository.database.Collection({{.ModelName}}Collection).DeleteMany(ctx, filter)
+	repository.database.Collection({{.ModelName}}Collection).DeleteMany(ctx, filter)
+	if err != nil {
+		return err
+	}
+	return nil
+}

@@ -1,0 +1,40 @@
+projectName: acs
+dbType: mongo
+dbName: ''
+dbTable: 'sys_button'
+comment: 系统按钮表
+modelName: 'SysButton'
+fields:
+  - fieldName: btn_id
+    fieldType: int
+    comment: "按钮ID"
+  - fieldName: btn_name
+    fieldType: string
+    comment: "按钮名称"
+  - fieldName: btn_class
+    fieldType: string
+    comment: "按钮样式名称"
+  - fieldName: btn_icon
+    fieldType: string
+    comment: "按钮图标"
+  - fieldName: btn_script
+    fieldType: string
+    comment: "按钮脚本"
+  - fieldName: request_url
+    fieldType: string
+    comment: "请求资源地址"
+  - fieldName: request_method
+    fieldType: string
+    comment: "请求方法"
+  - fieldName: btn_init_status
+    fieldType: string
+    comment: "按钮初始状态"
+  - fieldName: menu_id
+    fieldType: int
+    comment: "菜单ID"
+  - fieldName: create_time
+    fieldType: timestamp
+    comment: "创建时间"
+  - fieldName: last_time
+    fieldType: timestamp
+    comment: "修改时间"

@@ -1,0 +1,40 @@
+projectName: orm-generator
+dbType: mongo
+dbName: ''
+dbTable: 'sys_user'
+comment: 用户表
+modelName: 'User'
+fields:
+  - fieldName: user_id
+    fieldType: string
+    comment: "用户ID"
+  - fieldName: account
+    fieldType: string
+  - fieldName: pwd
+    fieldType: string
+  - fieldName: salt
+    fieldType: string
+  - fieldName: user_name
+    fieldType: string
+  - fieldName: telephone
+    fieldType: string
+  - fieldName: email
+    fieldType: string
+  - fieldName: user_state
+    fieldType: string
+  - fieldName: state
+    fieldType: string
+  - fieldName: application_id
+    fieldType: string
+  - fieldName: prefix_phone
+    fieldType: string
+  - fieldName: user_type
+    fieldType: string
+  - fieldName: nick_name
+    fieldType: string
+  - fieldName: is_admin
+    fieldType: bool
+  - fieldName: create_time
+    fieldType: timestamp
+  - fieldName: last_time
+    fieldType: timestamp

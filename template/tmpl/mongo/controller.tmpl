@@ -1,0 +1,202 @@
+package v1
+
+import (
+	"{{.ProjectName}}/app"
+	"{{.ProjectName}}/model"
+	"{{.ProjectName}}/services"
+	"context"
+	"github.com/kataras/iris"
+	"go.mongodb.org/mongo-driver/mongo"
+	"sync"
+)
+
+type {{.ModelName}}Controller interface {
+	Create(app *app.App) func(c iris.Context)
+	Update(app *app.App) func(c iris.Context)
+	Delete(app *app.App) func(c iris.Context)
+	Find(app *app.App) func(c iris.Context)
+	FindOne(app2 *app.App) func(c iris.Context)
+}
+
+type {{.ModelName|ScoreToSmallCamel}}Controller struct {
+	{{.ModelName|ScoreToSmallCamel}}Service services.{{.ModelName}}Service
+	idGeneratorService    services.IdGeneratorService
+}
+
+// @Summary TODO
+// @Description TODO
+// @Produce  json
+// @Param applicationId path integer true "" TODO
+// @Success 200 {object} model. TODO
+// @Router / [GET] TODO
+func (controller *{{.ModelName|ScoreToSmallCamel}}Controller) FindOne(app *app.App) func(c iris.Context) {
+	return func(c iris.Context) {
+		_, err := c.Params().GetInt64("applicationId") // TODO: 修改自己的主键ID
+		if err != nil {
+			c.Values().Set(model.ErrorContextKey, model.Error(model.ParamInputError, err.Error()))
+			return
+		}
+		{{.ModelName|ScoreToSmallCamel}}, err := controller.{{.ModelName|ScoreToSmallCamel}}Service.FindOne(context.Background(), &model.{{.ModelName}}{
+			// TODO 自定义主键ID ApplicationId: applicationId,
+		})
+		if err != nil {
+			c.Values().Set(model.ErrorContextKey, model.Error(model.InternalError, err.Error()))
+			return
+		}
+		c.JSON(model.Success({{.ModelName|ScoreToSmallCamel}}))
+	}
+}
+
+// @Summary TODO
+// @Description TODO
+// @Produce  json
+// @Param applicationId path integer true "" TODO
+// @Success 200 {object} model. TODO
+// @Router / [GET] TODO
+func (controller *{{.ModelName|ScoreToSmallCamel}}Controller) Create(app *app.App) func(c iris.Context) {
+	return func(c iris.Context) {
+		var json struct {
+			// TODO ApplicationName        string `json:"applicationName" validate:"required"`
+			// TODO ApplicationEnName      string `json:"applicationEnName" validate:"required"`
+			// TODO ApplicationDescription string `json:"applicationDescription"`
+			// TODO LesseeId               string `json:"lesseeId" validate:"required"`
+		}
+		err := c.ReadJSON(&json)
+		if err != nil {
+			c.Values().Set(model.ErrorContextKey, model.Error(model.ParamInputError, err.Error()))
+			return
+		}
+		err = app.Validate.Struct(json)
+		if err != nil {
+			c.Values().Set(model.ErrorContextKey, model.Error(model.ParamInputError, err.Error()))
+			return
+		}
+		ctx := context.Background()
+		applicationId, err := controller.idGeneratorService.GetId(ctx, "sys_application")
+		if err != nil {
+			c.Values().Set(model.ErrorContextKey, err)
+			return
+		}
+		_, err = controller.{{.ModelName|ScoreToSmallCamel}}Service.Create(ctx, &model.{{.ModelName}}{
+			// TODO ApplicationId:          *applicationId,
+			// TODO ApplicationName:        json.ApplicationName,
+			// TODO ApplicationEnName:      json.ApplicationEnName,
+			// TODO ApplicationDescription: json.ApplicationDescription,
+			// TODO LesseeId:               json.LesseeId,
+		})
+		if err != nil {
+			c.Values().Set(model.ErrorContextKey, err)
+			return
+		}
+		c.JSON(model.Success(map[string]interface{}{"id": applicationId}))
+
+	}
+}
+
+// @Summary TODO
+// @Description TODO
+// @Produce  json
+// @Param applicationId path integer true "" TODO
+// @Success 200 {object} model. TODO
+// @Router / [GET] TODO
+func (controller *{{.ModelName|ScoreToSmallCamel}}Controller) Update(app *app.App) func(c iris.Context) {
+	return func(c iris.Context) {
+		var requestData struct {
+			// TODO ApplicationId          int64  `json:"applicationId" validate:"required"`
+			// TODO ApplicationName        string `json:"applicationName" validate:"required"`
+			// TODO ApplicationEnName      string `json:"applicationEnName" validate:"required"`
+			// TODO ApplicationDescription string `json:"applicationDescription"`
+		}
+		err := c.ReadJSON(&requestData)
+		if err != nil {
+			c.Values().Set(model.ErrorContextKey, model.Error(model.ParamInputError, err.Error()))
+			return
+		}
+		err = app.Validate.Struct(requestData)
+		if err != nil {
+			c.Values().Set(model.ErrorContextKey, model.Error(model.ParamInputError, err.Error()))
+			return
+		}
+		err = controller.{{.ModelName|ScoreToSmallCamel}}Service.Update(context.Background(), &model.{{.ModelName}}{
+			// TODO ApplicationId:          requestData.ApplicationId,
+			// TODO ApplicationName:        requestData.ApplicationName,
+			// TODO ApplicationEnName:      requestData.ApplicationEnName,
+			// TODO ApplicationDescription: requestData.ApplicationDescription,
+		})
+		if err != nil {
+			c.Values().Set(model.ErrorContextKey, model.Error(model.ParamInputError, err.Error()))
+			return
+		}
+		c.JSON(model.Success(map[string]interface{}{"id": ""})) // TODO: 自定义返回值
+	}
+}
+
+// @Summary 分页查询
+// @Description 分页查询
+// @Accept json
+// @Produce  json
+// @Param id query string false "分页查询Page返回参数ID, 后台返回什么请求时携带此参数, 没有则为空字符串"
+// @Param pageSize query integer false "每页显示数量, 默认20"
+// @Param pageNo query integer false "页码, 默认为1"
+// @Param sortField query string false "排序字段"
+// @Param isAsc query boolean false "是否升序: 默认 true"
+// @Param applicationId query integer false "应用ID"
+// @Param applicationName query string false "应用名称"
+// @Param applicationEnName query string false "应用英文名称"
+// @Success 200 {object} model.Response{{.ModelName}}Data
+// @Router /api/v1/sys_application [GET]
+func (controller *{{.ModelName|ScoreToSmallCamel}}Controller) Find(app *app.App) func(c iris.Context) {
+	return func(c iris.Context) {
+		requestData := model.NewSearch{{.ModelName}}Param(c.URLParams())
+		responseData, err := controller.{{.ModelName|ScoreToSmallCamel}}Service.Find(context.Background(), &requestData)
+		if err != nil {
+			c.Values().Set(model.ErrorContextKey, model.Error(model.Unauthorized, err.Error()))
+		}
+		c.JSON(model.Success(responseData))
+	}
+}
+
+// @Summary TODO
+// @Description TODO
+// @Produce  json
+// @Param applicationId path integer true "" TODO
+// @Success 200 {object} model. TODO
+// @Router / [GET] TODO
+func (controller *{{.ModelName|ScoreToSmallCamel}}Controller) Delete(app *app.App) func(c iris.Context) {
+	return func(c iris.Context) {
+		var requestData struct {
+			ApplicationId int64 `json:"applicationId" validate:"required"`
+		}
+		err := c.ReadJSON(&requestData)
+		if err != nil {
+			c.Values().Set(model.ErrorContextKey, model.Error(model.ParamInputError, err.Error()))
+			return
+		}
+		err = app.Validate.Struct(requestData)
+		if err != nil {
+			c.Values().Set(model.ErrorContextKey, model.Error(model.ParamInputError, err.Error()))
+			return
+		}
+		err = controller.{{.ModelName|ScoreToSmallCamel}}Service.DeleteOne(context.Background(), &model.{{.ModelName}}{
+			// TODO 改为自己的主键ID 如ApplicationId: requestData.ApplicationId,
+		})
+		if err != nil {
+			c.Values().Set(model.ErrorContextKey, model.Error(model.Unauthorized, err.Error()))
+			return
+		}
+		c.JSON(model.Success(map[string]interface{}{"id": requestData.ApplicationId}))
+	}
+}
+
+var _{{.ModelName|ScoreToSmallCamel}}Controller *{{.ModelName|ScoreToSmallCamel}}Controller
+var {{.ModelName|ScoreToSmallCamel}}ControllerOnce sync.Once
+
+func New{{.ModelName}}Controller(database *mongo.Database) {{.ModelName}}Controller {
+	{{.ModelName|ScoreToSmallCamel}}ControllerOnce.Do(func() {
+		_{{.ModelName|ScoreToSmallCamel}}Controller = &{{.ModelName|ScoreToSmallCamel}}Controller{
+			{{.ModelName|ScoreToSmallCamel}}Service: services.New{{.ModelName}}Service(database),
+			idGeneratorService:    services.NewIdGeneratorService(database),
+		}
+	})
+	return _{{.ModelName|ScoreToSmallCamel}}Controller
+}

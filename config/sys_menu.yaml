@@ -1,0 +1,52 @@
+projectName: acs
+dbType: mongo
+dbName: ''
+dbTable: 'sys_menu'
+comment: 系统菜单表
+modelName: 'SysMenu'
+fields:
+  - fieldName: menu_id
+    fieldType: int
+    comment: "菜单ID"
+  - fieldName: menu_name
+    fieldType: string
+    comment: "菜单名称"
+  - fieldName: menu_en_name
+    fieldType: string
+    comment: "菜单英文名称"
+  - fieldName: menu_pid
+    fieldType: string
+    comment: "菜单父ID"
+  - fieldName: menu_order
+    fieldType: int
+    comment: "菜单同级排序"
+  - fieldName: menu_icon
+    fieldType: int
+    comment: "图标"
+  - fieldName: request_url
+    fieldType: string
+    comment: "请求链接地址"
+  - fieldName: request_method
+    fieldType: string
+    comment: "请求方法"
+  - fieldName: is_visible
+    fieldType: string
+    comment: "是否可见"
+  - fieldName: is_leaf
+    fieldType: string
+    comment: "是否叶子节点"
+  - fieldName: title
+    fieldType: string
+    comment: "页面Title"
+  - fieldName: description
+    fieldType: string
+    comment: "说明信息"
+  - fieldName: application_id
+    fieldType: string
+    comment: "所属应用ID"
+  - fieldName: create_time
+    fieldType: timestamp
+    comment: "创建时间"
+  - fieldName: last_time
+    fieldType: timestamp
+    comment: "修改时间"

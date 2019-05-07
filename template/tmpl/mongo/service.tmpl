@@ -1,0 +1,69 @@
+package services
+
+import (
+	"{{.ProjectName}}/model"
+	"{{.ProjectName}}/repository"
+	"context"
+	"go.mongodb.org/mongo-driver/mongo"
+	"sync"
+	"time"
+)
+type {{.ModelName}}Service interface {
+	Create(ctx context.Context, {{.ModelName|ScoreToSmallCamel}} *model.{{.ModelName}}) (string, error)
+	Update(ctx context.Context, {{.ModelName|ScoreToSmallCamel}} *model.{{.ModelName}}) error
+	Find(ctx context.Context, findParam *model.Search{{.ModelName}}Param) (*model.Response{{.ModelName}}Data, error)
+	FindOne(ctx context.Context, findParam *model.{{.ModelName}}) (*model.{{.ModelName}}, error)
+	DeleteOne(ctx context.Context, findParam *model.{{.ModelName}}) error
+}
+
+func New{{.ModelName}}Service(database *mongo.Database) {{.ModelName}}Service {
+	{{.ModelName|ScoreToSmallCamel}}Once.Do(func() {
+		_{{.ModelName|ScoreToSmallCamel}}Service = &{{.ModelName|ScoreToSmallCamel}}Service{
+			repository.New{{.ModelName}}Repository(database),
+		}
+	})
+	return _{{.ModelName|ScoreToSmallCamel}}Service
+}
+
+var _{{.ModelName|ScoreToSmallCamel}}Service {{.ModelName}}Service
+var {{.ModelName|ScoreToSmallCamel}}Once sync.Once
+
+type {{.ModelName|ScoreToSmallCamel}}Service struct {
+	{{.ModelName|ScoreToSmallCamel}}Repository *repository.{{.ModelName}}Repository
+}
+
+func (service *{{.ModelName|ScoreToSmallCamel}}Service) FindOne(ctx context.Context, findParam *model.{{.ModelName}}) (*model.{{.ModelName}}, error) {
+	return service.{{.ModelName|ScoreToSmallCamel}}Repository.FindOne(ctx, findParam)
+}
+
+func (service *{{.ModelName|ScoreToSmallCamel}}Service) DeleteOne(ctx context.Context, findParam *model.{{.ModelName}}) error {
+	return service.{{.ModelName|ScoreToSmallCamel}}Repository.DeleteOne(ctx, findParam)
+}
+
+func (service *{{.ModelName|ScoreToSmallCamel}}Service) Find(ctx context.Context, findParam *model.Search{{.ModelName}}Param) (*model.Response{{.ModelName}}Data, error) {
+	return service.{{.ModelName|ScoreToSmallCamel}}Repository.FindByPage(ctx, findParam.Page, &findParam.{{.ModelName}})
+}
+
+func (service *{{.ModelName|ScoreToSmallCamel}}Service) Update(ctx context.Context, {{.ModelName|ScoreToSmallCamel}} *model.{{.ModelName}}) error {
+	filter := model.{{.ModelName}}{
+		// TODO: 补充ID, 参考 ApplicationId: {{.ModelName|ScoreToSmallCamel}}.ApplicationId,
+	}
+	_, err := service.{{.ModelName|ScoreToSmallCamel}}Repository.FindOne(ctx, &filter)
+	if err != nil {
+		return err
+	}
+	now := time.Now()
+	{{.ModelName|ScoreToSmallCamel}}.LastTime = &now
+	err = service.{{.ModelName|ScoreToSmallCamel}}Repository.UpdateOne(ctx, &filter, {{.ModelName|ScoreToSmallCamel}})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (service *{{.ModelName|ScoreToSmallCamel}}Service) Create(ctx context.Context, {{.ModelName|ScoreToSmallCamel}} *model.{{.ModelName}}) (string, error) {
+	now := time.Now()
+	{{.ModelName|ScoreToSmallCamel}}.CreateTime = &now
+	return service.{{.ModelName|ScoreToSmallCamel}}Repository.InsertOne(ctx, {{.ModelName|ScoreToSmallCamel}})
+}
+

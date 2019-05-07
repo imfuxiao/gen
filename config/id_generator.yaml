@@ -1,0 +1,10 @@
+projectName: acs
+dbType: mongo
+dbName: ''
+dbTable: 'yak_id_generator'
+comment: ID生成
+modelName: 'IdGenerator'
+fields:
+  - fieldName: SequenceId
+    fieldType: string
+    comment: "序列值"
