@@ -43,7 +43,7 @@ func (controller *{{.ModelName|ScoreToSmallCamel}}Controller) FindOne(app *app.A
 			c.Values().Set(model.ErrorContextKey, model.Error(model.InternalError, err.Error()))
 			return
 		}
-		c.JSON(model.Success({{.ModelName|ScoreToSmallCamel}}))
+		_, _ = c.JSON(model.Success({{.ModelName|ScoreToSmallCamel}}))
 	}
 }
 
@@ -88,7 +88,7 @@ func (controller *{{.ModelName|ScoreToSmallCamel}}Controller) Create(app *app.Ap
 			c.Values().Set(model.ErrorContextKey, err)
 			return
 		}
-		c.JSON(model.Success(map[string]interface{}{"id": applicationId}))
+		_, _ = c.JSON(model.Success(map[string]interface{}{"id": applicationId}))
 
 	}
 }
@@ -127,7 +127,7 @@ func (controller *{{.ModelName|ScoreToSmallCamel}}Controller) Update(app *app.Ap
 			c.Values().Set(model.ErrorContextKey, model.Error(model.ParamInputError, err.Error()))
 			return
 		}
-		c.JSON(model.Success(map[string]interface{}{"id": ""})) // TODO: 自定义返回值
+		_, _ = c.JSON(model.Success(map[string]interface{}{"id": ""})) // TODO: 自定义返回值
 	}
 }
 
@@ -152,7 +152,7 @@ func (controller *{{.ModelName|ScoreToSmallCamel}}Controller) Find(app *app.App)
 		if err != nil {
 			c.Values().Set(model.ErrorContextKey, model.Error(model.Unauthorized, err.Error()))
 		}
-		c.JSON(model.Success(responseData))
+		_, _ = c.JSON(model.Success(responseData))
 	}
 }
 
@@ -184,7 +184,7 @@ func (controller *{{.ModelName|ScoreToSmallCamel}}Controller) Delete(app *app.Ap
 			c.Values().Set(model.ErrorContextKey, model.Error(model.Unauthorized, err.Error()))
 			return
 		}
-		c.JSON(model.Success(map[string]interface{}{"id": requestData.ApplicationId}))
+		_, _ = c.JSON(model.Success(map[string]interface{}{"id": requestData.ApplicationId}))
 	}
 }
 
