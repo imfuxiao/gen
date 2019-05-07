@@ -15,6 +15,7 @@ import (
 
 type Model struct {
 	ProjectName  string   `yaml:"projectName"`
+	Version      string   `yaml:"version"`
 	ModelName    string   `yaml:"modelName"`
 	DbType       string   `yaml:"dbType"`
 	DbName       string   `yaml:"dbName"`
@@ -39,8 +40,7 @@ type Field struct {
 }
 
 func NewField() *Field {
-	return &Field{
-	}
+	return &Field{}
 }
 
 func Read(filePath string) (*Model, error) {

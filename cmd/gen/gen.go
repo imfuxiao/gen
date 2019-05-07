@@ -23,7 +23,7 @@ var rootCmd = &cobra.Command{
 			fmt.Println(err.Error())
 			os.Exit(1)
 		}
-		err = template.ExecuteModelTemplate(outPath+"/entity", model, "entity")
+		err = template.ExecuteModelTemplate(outPath+"/model", model, "entity")
 		if err != nil {
 			fmt.Println("entity generator error: ", err.Error())
 			os.Exit(1)
@@ -33,12 +33,12 @@ var rootCmd = &cobra.Command{
 			fmt.Println("repository generator error: ", err.Error())
 			os.Exit(1)
 		}
-		err = template.ExecuteModelTemplate(outPath+"/service", model, "service")
+		err = template.ExecuteModelTemplate(outPath+"/services", model, "service")
 		if err != nil {
 			fmt.Println("service generator error: ", err.Error())
 			os.Exit(1)
 		}
-		err = template.ExecuteModelTemplate(outPath+"/controller", model, "controller")
+		err = template.ExecuteModelTemplate(outPath+"/controller/"+model.Version, model, "controller")
 		if err != nil {
 			fmt.Println("controller generator error: ", err.Error())
 			os.Exit(1)
