@@ -389,7 +389,7 @@ func (f *Field) GetTag() string {
 	tagstr := []string{}
 	for tag, camel := range tags {
 		if val, ok := f.Attrs[tag+"Tag"]; ok {
-			tagstr = append(tagstr, fmt.Sprintf("%s:\"%s\"", tag, val))
+			tagstr = append(tagstr, fmt.Sprintf("%s:\"%s,omitempty\"", tag, val))
 		} else {
 			var name string
 			switch tag {
@@ -399,9 +399,9 @@ func (f *Field) GetTag() string {
 				name = f.Name
 			}
 			if camel {
-				tagstr = append(tagstr, fmt.Sprintf("%s:\"%s\"", tag, name))
+				tagstr = append(tagstr, fmt.Sprintf("%s:\"%s,omitempty\"", tag, name))
 			} else {
-				tagstr = append(tagstr, fmt.Sprintf("%s:\"%s\"", tag, Camel2Name(name)))
+				tagstr = append(tagstr, fmt.Sprintf("%s:\"%s,omitempty\"", tag, Camel2Name(name)))
 			}
 		}
 	}
