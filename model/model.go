@@ -386,7 +386,7 @@ func (f *Field) GetTag() string {
 		tags["db"] = false
 	}
 
-	tagstr := []string{}
+	var tagstr []string
 	for tag, camel := range tags {
 		if val, ok := f.Attrs[tag+"Tag"]; ok {
 			tagstr = append(tagstr, fmt.Sprintf("%s:\"%s,omitempty\"", tag, val))
@@ -394,7 +394,7 @@ func (f *Field) GetTag() string {
 			var name string
 			switch tag {
 			case "json":
-				name = ScoreToBigCamel(f.Name)
+				name = ScoreToSmallCamel(f.Name)
 			default:
 				name = f.Name
 			}
@@ -408,10 +408,10 @@ func (f *Field) GetTag() string {
 	if f.Validator != "" {
 		tagstr = append(tagstr, fmt.Sprintf("validate:\"%s\"", f.Validator))
 	}
-	sortstr := sort.StringSlice(tagstr)
-	sort.Sort(sortstr)
-	if len(sortstr) != 0 {
-		return "`" + strings.Join(sortstr, " ") + "`"
+	sortStr := sort.StringSlice(tagstr)
+	sort.Sort(sortStr)
+	if len(sortStr) != 0 {
+		return "`" + strings.Join(sortStr, " ") + "`"
 	}
 	return ""
 }

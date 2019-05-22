@@ -9,10 +9,10 @@ import (
 	"time"
 )
 type {{.ModelName}}Service interface {
-	Create(ctx context.Context, {{.ModelName|ScoreToSmallCamel}} *model.{{.ModelName}}) (string, error)
-	Update(ctx context.Context, {{.ModelName|ScoreToSmallCamel}} *model.{{.ModelName}}) error
 	Find(ctx context.Context, findParam *model.Search{{.ModelName}}Param) (*model.Response{{.ModelName}}Data, error)
 	FindOne(ctx context.Context, findParam *model.{{.ModelName}}) (*model.{{.ModelName}}, error)
+	Create(ctx context.Context, {{.ModelName|ScoreToSmallCamel}} *model.{{.ModelName}}) (string, error)
+	Update(ctx context.Context, {{.ModelName|ScoreToSmallCamel}} *model.{{.ModelName}}) error
 	DeleteOne(ctx context.Context, findParam *model.{{.ModelName}}) error
 }
 
@@ -32,16 +32,18 @@ type {{.ModelName|ScoreToSmallCamel}}Service struct {
 	{{.ModelName|ScoreToSmallCamel}}Repository *repository.{{.ModelName}}Repository
 }
 
+func (service *{{.ModelName|ScoreToSmallCamel}}Service) Find(ctx context.Context, findParam *model.Search{{.ModelName}}Param) (*model.Response{{.ModelName}}Data, error) {
+	return service.{{.ModelName|ScoreToSmallCamel}}Repository.FindByPage(ctx, findParam.Page, findParam.Params)
+}
+
 func (service *{{.ModelName|ScoreToSmallCamel}}Service) FindOne(ctx context.Context, findParam *model.{{.ModelName}}) (*model.{{.ModelName}}, error) {
 	return service.{{.ModelName|ScoreToSmallCamel}}Repository.FindOne(ctx, findParam)
 }
 
-func (service *{{.ModelName|ScoreToSmallCamel}}Service) DeleteOne(ctx context.Context, findParam *model.{{.ModelName}}) error {
-	return service.{{.ModelName|ScoreToSmallCamel}}Repository.DeleteOne(ctx, findParam)
-}
-
-func (service *{{.ModelName|ScoreToSmallCamel}}Service) Find(ctx context.Context, findParam *model.Search{{.ModelName}}Param) (*model.Response{{.ModelName}}Data, error) {
-	return service.{{.ModelName|ScoreToSmallCamel}}Repository.FindByPage(ctx, findParam.Page, &findParam.{{.ModelName}})
+func (service *{{.ModelName|ScoreToSmallCamel}}Service) Create(ctx context.Context, {{.ModelName|ScoreToSmallCamel}} *model.{{.ModelName}}) (string, error) {
+	now := time.Now()
+	{{.ModelName|ScoreToSmallCamel}}.CreateTime = &now
+	return service.{{.ModelName|ScoreToSmallCamel}}Repository.InsertOne(ctx, {{.ModelName|ScoreToSmallCamel}})
 }
 
 func (service *{{.ModelName|ScoreToSmallCamel}}Service) Update(ctx context.Context, {{.ModelName|ScoreToSmallCamel}} *model.{{.ModelName}}) error {
@@ -61,9 +63,7 @@ func (service *{{.ModelName|ScoreToSmallCamel}}Service) Update(ctx context.Conte
 	return nil
 }
 
-func (service *{{.ModelName|ScoreToSmallCamel}}Service) Create(ctx context.Context, {{.ModelName|ScoreToSmallCamel}} *model.{{.ModelName}}) (string, error) {
-	now := time.Now()
-	{{.ModelName|ScoreToSmallCamel}}.CreateTime = &now
-	return service.{{.ModelName|ScoreToSmallCamel}}Repository.InsertOne(ctx, {{.ModelName|ScoreToSmallCamel}})
+func (service *{{.ModelName|ScoreToSmallCamel}}Service) DeleteOne(ctx context.Context, findParam *model.{{.ModelName}}) error {
+	return service.{{.ModelName|ScoreToSmallCamel}}Repository.DeleteOne(ctx, findParam)
 }
 

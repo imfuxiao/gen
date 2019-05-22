@@ -1,41 +1,81 @@
 package model
 
 import (
-"time"
+	"strconv"
+	"time"
 {{- if eq .DbType "mongo"}}
-    "go.mongodb.org/mongo-driver/bson/primitive"
+	"acs/commons/mongo/criteria"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 {{end}}
 )
 
 type {{.ModelName}} struct {
-{{- if eq .DbType "mongo"}}
-    Id primitive.ObjectID `bson:"_id,omitempty" json:"-"`
-{{end}}
+{{ if eq .DbType "mongo"}}	Id *primitive.ObjectID `bson:"_id,omitempty" json:"-"`{{end -}}
 {{- range $field := .Fields}}
-    {{ScoreToBigCamel $field.Name}} {{if Contains $field.Name "time"}}*{{end}}{{$field.GetType}} {{$field.GetTag|ToHTML}}{{if ne $field.Comment ""}} // {{$field.Comment}}{{end}}
-{{end -}}
+	{{ScoreToBigCamel $field.Name}} {{if Contains $field.Name "time"}}*{{end}}{{$field.GetType}} {{$field.GetTag|ToHTML}}{{if ne $field.Comment ""}} // {{$field.Comment}}{{end -}}
+{{end }}
 }
 
 
 // 查询参数
 type Search{{.ModelName}}Param struct {
-	Page           Page
-    {{.ModelName|ScoreToBigCamel}} {{.ModelName}}
+	Page   Page
+	Params bson.D
 }
 
 func NewSearch{{.ModelName}}Param(param map[string]string) Search{{.ModelName}}Param {
     // TODO 完成自己的struct初始化, 如下
 	var s Search{{.ModelName}}Param
 
-	// if val, ok := param["id"]; ok {
-	// 	s.Page.Id = val
-	// }
-    //
+	if val, ok := param["id"]; ok {
+		s.Page.Id = val
+	}
+
+	if val, ok := param["pageSize"]; ok {
+		pageSize, err := strconv.Atoi(val)
+		if err == nil {
+			s.Page.PageSize = pageSize
+		} else {
+			s.Page.PageSize = 20
+		}
+	} else {
+		s.Page.PageSize = 20
+	}
+
+	if val, ok := param["pageNumber"]; ok {
+		pageNo, err := strconv.Atoi(val)
+		if err != nil {
+			pageNo = 1
+		} else {
+			s.Page.PageNo = pageNo
+		}
+	} else {
+		s.Page.PageNo = 1
+	}
+
+	if val, ok := param["sortField"]; ok {
+		s.Page.SortField = val
+	}
+
+	if val, ok := param["isAsc"]; ok {
+		isAsc, err := strconv.ParseBool(val)
+		if err == nil {
+			s.Page.IsAsc = isAsc
+		}
+	} else {
+		s.Page.IsAsc = true
+	}
+
+	filter := criteria.Where()
+	// TODO: 自定义分页查询条件
+
+	s.Params = filter.Filter()
     return s
 }
 
 // 查询结果
 type Response{{.ModelName}}Data struct {
-    {{.ModelName|ScoreToBigCamel}}s []{{.ModelName}} // 查询数据
-	Page         Page             // 页码信息
+	Page         Page             `json:"page"` // 页码信息
+    {{.ModelName|ScoreToBigCamel}}List []{{.ModelName}} `json:"list"` // 查询数据
 }
