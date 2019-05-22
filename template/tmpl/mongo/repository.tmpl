@@ -109,18 +109,15 @@ func (repository *{{.ModelName}}Repository) InsertOne(ctx context.Context, {{.Mo
 	return utils.InsertedIDToString(result)
 }
 
-func (repository *{{.ModelName}}Repository) InsertMany(ctx context.Context, {{.ModelName|ScoreToSmallCamel}}s []model.{{.ModelName}}) ([]string, error) {
+func (repository *{{.ModelName}}Repository) InsertMany(ctx context.Context, {{.ModelName|ScoreToSmallCamel}}List []model.{{.ModelName}}) ([]string, error) {
 	// TODO: 这里使用转换函数转为后, 插入值全部为空, 估计bson转换这里有问题, 临时先用for循环替换
-	// data, err := utils.ParseInterface({{.ModelName|ScoreToSmallCamel}}s)
-	if len(sysApplications) == 0 {
+	// data, err := utils.ParseInterface({{.ModelName|ScoreToSmallCamel}}List)
+	if len({{.ModelName|ScoreToSmallCamel}}List) == 0 {
 		return nil, errors.New("data is nil")
 	}
-	interfaces := make([]interface{}, len({{.ModelName|ScoreToSmallCamel}}s))
-	for i, v := range {{.ModelName|ScoreToSmallCamel}}s {
+	interfaces := make([]interface{}, len({{.ModelName|ScoreToSmallCamel}}List))
+	for i, v := range {{.ModelName|ScoreToSmallCamel}}List {
 		interfaces[i] = v
-	}
-	if err != nil {
-		return nil, err
 	}
 	result, err := repository.database.Collection({{.ModelName}}Collection).InsertMany(ctx, interfaces)
 	if err != nil {

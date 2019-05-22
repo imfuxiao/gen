@@ -38,8 +38,12 @@ type {{.ModelName|ScoreToSmallCamel}}Controller struct {
 // TODO: Router /api/v1/application [GET]
 func (controller *{{.ModelName|ScoreToSmallCamel}}Controller) Find(app *app.App) func(c iris.Context) {
 	return func(c iris.Context) {
-		requestData := model.NewSearch{{.ModelName}}Param(c.URLParams())
-		responseData, err := controller.{{.ModelName|ScoreToSmallCamel}}Service.Find(context.Background(), &requestData)
+		requestData, err := model.NewSearch{{.ModelName}}Param(c.Params())
+		if err != nil {
+			c.Values().Set(model.ErrorContextKey, model.Error(model.ParamInputError, err.Error()))
+			return
+		}
+		responseData, err := controller.{{.ModelName|ScoreToSmallCamel}}Service.Find(context.Background(), requestData)
 		if err != nil {
 			c.Values().Set(model.ErrorContextKey, model.Error(model.Unauthorized, err.Error()))
 		}

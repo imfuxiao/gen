@@ -3,6 +3,8 @@ package model
 import (
 	"strconv"
 	"time"
+	"errors"
+	"github.com/kataras/iris/context"
 {{- if eq .DbType "mongo"}}
 	"acs/commons/mongo/criteria"
 	"go.mongodb.org/mongo-driver/bson"
@@ -24,54 +26,21 @@ type Search{{.ModelName}}Param struct {
 	Params bson.D
 }
 
-func NewSearch{{.ModelName}}Param(param map[string]string) Search{{.ModelName}}Param {
+func NewSearch{{.ModelName}}Param(param *context.RequestParams) (*Search{{.ModelName}}Param, error) {
     // TODO 完成自己的struct初始化, 如下
 	var s Search{{.ModelName}}Param
 
-	if val, ok := param["id"]; ok {
-		s.Page.Id = val
-	}
-
-	if val, ok := param["pageSize"]; ok {
-		pageSize, err := strconv.Atoi(val)
-		if err == nil {
-			s.Page.PageSize = pageSize
-		} else {
-			s.Page.PageSize = 20
-		}
-	} else {
-		s.Page.PageSize = 20
-	}
-
-	if val, ok := param["pageNumber"]; ok {
-		pageNo, err := strconv.Atoi(val)
-		if err != nil {
-			pageNo = 1
-		} else {
-			s.Page.PageNo = pageNo
-		}
-	} else {
-		s.Page.PageNo = 1
-	}
-
-	if val, ok := param["sortField"]; ok {
-		s.Page.SortField = val
-	}
-
-	if val, ok := param["isAsc"]; ok {
-		isAsc, err := strconv.ParseBool(val)
-		if err == nil {
-			s.Page.IsAsc = isAsc
-		}
-	} else {
-		s.Page.IsAsc = true
-	}
+	s.Page.Id = param.GetString("id")
+	s.Page.SortField = param.GetString("sortField")
+	s.Page.IsAsc = param.GetBoolDefault("isAsc", true)
+	s.Page.PageNo = param.GetInt64Default("pageNumber", 1)
+	s.Page.PageSize = param.GetInt64Default("pageSize", 20)
 
 	filter := criteria.Where()
 	// TODO: 自定义分页查询条件
 
 	s.Params = filter.Filter()
-    return s
+    return &s,nil
 }
 
 // 查询结果
