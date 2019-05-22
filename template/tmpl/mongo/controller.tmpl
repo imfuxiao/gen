@@ -12,7 +12,7 @@ import (
 
 type {{.ModelName}}Controller interface {
 	Find(app *app.App) func(c iris.Context)
-	FindOne(app2 *app.App) func(c iris.Context)
+	FindOne(app *app.App) func(c iris.Context)
 	Create(app *app.App) func(c iris.Context)
 	Update(app *app.App) func(c iris.Context)
 	Delete(app *app.App) func(c iris.Context)
