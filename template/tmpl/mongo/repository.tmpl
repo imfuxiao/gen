@@ -128,7 +128,7 @@ func (repository *{{.ModelName}}Repository) InsertMany(ctx context.Context, {{.M
 
 func (repository *{{.ModelName}}Repository) UpdateOne(ctx context.Context, filter interface{}, {{.ModelName|ScoreToSmallCamel}} *model.{{.ModelName}})  error {
 	_, err := repository.database.Collection({{.ModelName}}Collection).UpdateOne(ctx, filter, bson.D{
-		{"$set", {{.ModelName|ScoreToSmallCamel}}},
+		{Key: "$set", Value: {{.ModelName|ScoreToSmallCamel}}},
 	})
 	if err != nil {
 		return err
